@@ -1,4 +1,4 @@
-import mongoose, { Schema, model } from 'mongoose';
+import { Schema, model } from 'mongoose';
 import { IUser } from '../interface/user';
 
 const userSchema = new Schema<IUser>(
@@ -64,6 +64,33 @@ const userSchema = new Schema<IUser>(
 			sizeInBytes: {
 				type: String,
 				required: false,
+			},
+		},
+		address: {
+			street: {
+				type: String,
+				required: false,
+				default: '',
+			},
+			villages: {
+				type: String,
+				required: false,
+				default: '',
+			},
+			districts: {
+				type: String,
+				required: false,
+				default: '',
+			},
+			regencies: {
+				type: String,
+				required: false,
+				default: '',
+			},
+			provinces: {
+				type: String,
+				required: false,
+				default: '',
 			},
 		},
 	},

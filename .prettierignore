@@ -7,3 +7,4 @@ tsconfig.json
 esbuild.js
 .env
 package.json
+package-lock.json

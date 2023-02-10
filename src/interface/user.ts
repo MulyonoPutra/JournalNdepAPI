@@ -1,6 +1,7 @@
 import { Document } from 'mongoose';
 import { Images } from './images';
 import { Request } from 'express';
+import { Address } from './address';
 
 export interface IUser extends Document {
 	username: string;
@@ -13,6 +14,7 @@ export interface IUser extends Document {
 	description: string;
 	avatar: string;
 	images: Images;
+	address: Address;
 	_doc: object;
 }
 

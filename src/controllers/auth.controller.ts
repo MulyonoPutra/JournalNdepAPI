@@ -21,8 +21,10 @@ import {
 	RegisterRequestType,
 	RegisterResponseType,
 } from '../type/auth.type';
+import { UserDTO } from '../interface/login';
 
-export const register = (role?: string) =>
+export const register =
+	(role?: string) =>
 	async (req: RegisterRequestType, res: RegisterResponseType) => {
 		try {
 			const { username, account, password } = req.body;
@@ -73,8 +75,12 @@ export const login = async (req: LoginRequestType, res: LoginResponseType) => {
 	}
 };
 
-const loginSuccessful = async (user: IUser, password: string, res: LoginResponseType) => {
-	const isValid = await bcrypt.compare(password, user.password);
+const loginSuccessful = async (
+	user: IUser,
+	passwords: string,
+	res: LoginResponseType
+) => {
+	const isValid = await bcrypt.compare(passwords, user.password);
 
 	// Check if password is valid
 	if (!isValid) {
@@ -91,13 +97,42 @@ const loginSuccessful = async (user: IUser, password: string, res: LoginResponse
 		maxAge: 24 * 60 * 60 * 1000, // secure: true
 	});
 
+	const {
+		_id,
+		images,
+		username,
+		account,
+		role,
+		phone,
+		dob,
+		description,
+		avatar,
+		address,
+	} = user;
+
+	const userDTO: UserDTO = {
+		_id,
+		images,
+		username,
+		account,
+		role,
+		phone,
+		dob,
+		description,
+		avatar,
+		address,
+	};
+
 	return res.status(200).json({
 		message: 'Success',
-		data: { accessToken, user },
+		data: { accessToken, user: userDTO },
 	});
 };
 
-export const refreshToken = async (req: RefreshTokenRequestType, res: RefreshTokenResponseType) => {
+export const refreshToken = async (
+	req: RefreshTokenRequestType,
+	res: RefreshTokenResponseType
+) => {
 	try {
 		const token = req.cookies?.refreshToken;
 		if (!token) {
@@ -106,14 +141,19 @@ export const refreshToken = async (req: RefreshTokenRequestType, res: RefreshTok
 			});
 		}
 
-		const decoded = jwt.verify(token, `${Environment.refreshTokenSecret}`) as IDecoded;
+		const decoded = jwt.verify(
+			token,
+			`${Environment.refreshTokenSecret}`
+		) as IDecoded;
 		if (!decoded.id) {
 			return res.status(400).json({
 				message: 'Refresh token is invalid!',
 			});
 		}
 
-		const user = await UserSchema.findOne({ _id: decoded.id }).select('+password');
+		const user = await UserSchema.findOne({ _id: decoded.id }).select(
+			'+password'
+		);
 		if (!user) {
 			return res.status(400).json({
 				message: 'This account does not exist!',
@@ -128,7 +168,10 @@ export const refreshToken = async (req: RefreshTokenRequestType, res: RefreshTok
 	}
 };
 
-export const logout = async (req: LogoutRequestType, res: NewAccessTokenResponseType) => {
+export const logout = async (
+	req: LogoutRequestType,
+	res: NewAccessTokenResponseType
+) => {
 	try {
 		const token = req.cookies?.refreshToken;
 		if (!token) {

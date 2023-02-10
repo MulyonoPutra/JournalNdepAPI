@@ -6,7 +6,7 @@ import {
 	NewProductResponseType,
 	ProductRequestType,
 	ProductResponseType,
-	RemoveProductResponseType
+	RemoveProductResponseType,
 } from '../type/product.type';
 import AppError from '../utility/app-error';
 import { uploadCloudinary } from '../utility/upload-cloudinary';
@@ -17,7 +17,11 @@ const hideAttributes = {
 	updatedAt: 0,
 };
 
-export const findAll = async (req: Request, res: ProductResponseType, next: NextFunction) => {
+export const findAll = async (
+	req: Request,
+	res: ProductResponseType,
+	next: NextFunction
+) => {
 	try {
 		const data = await ProductSchema.find({}, hideAttributes);
 		return res.status(200).json({
@@ -29,7 +33,11 @@ export const findAll = async (req: Request, res: ProductResponseType, next: Next
 	}
 };
 
-export const create = async (req: ProductRequestType, res: NewProductResponseType, next: NextFunction) => {
+export const create = async (
+	req: ProductRequestType,
+	res: NewProductResponseType,
+	next: NextFunction
+) => {
 	try {
 		const { name, price, quantity } = req.body;
 		const newProduct = new ProductSchema({ name, price, quantity });
@@ -45,9 +53,12 @@ export const create = async (req: ProductRequestType, res: NewProductResponseTyp
 	}
 };
 
-export const createProduct = async (req: Request, res: NewProductResponseType) => {
+export const createProduct = async (
+	req: Request,
+	res: NewProductResponseType
+) => {
 	try {
-		if(!req.file) {
+		if (!req.file) {
 			return res.status(400).json({ message: 'No file uploaded!' });
 		}
 
@@ -76,13 +87,16 @@ export const createProduct = async (req: Request, res: NewProductResponseType) =
 			message: 'Created new Product!',
 			data: newProduct,
 		});
-
 	} catch (e) {
 		return res.status(500).json({ message: 'Internal Server Errors!' });
 	}
-}
+};
 
-export const findById = async (req: Request, res: FindOneProductResponseType, next: NextFunction) => {
+export const findById = async (
+	req: Request,
+	res: FindOneProductResponseType,
+	next: NextFunction
+) => {
 	try {
 		const { id } = req.params;
 		const data = await ProductSchema.findOne({ _id: id }, hideAttributes);
@@ -95,7 +109,11 @@ export const findById = async (req: Request, res: FindOneProductResponseType, ne
 	}
 };
 
-export const remove = async (req: Request, res: RemoveProductResponseType, next: NextFunction) => {
+export const remove = async (
+	req: Request,
+	res: RemoveProductResponseType,
+	next: NextFunction
+) => {
 	try {
 		const { id } = req.params;
 		let publicId: string | undefined;
@@ -115,13 +133,16 @@ export const remove = async (req: Request, res: RemoveProductResponseType, next:
 		return res.status(200).json({
 			message: 'Data successfully removed',
 		});
-
 	} catch (e) {
 		return next(new AppError('Internal Server Error!', 500));
 	}
-}
+};
 
-export const update = async (req: Request, res: FindOneProductResponseType, next: NextFunction) => {
+export const update = async (
+	req: Request,
+	res: FindOneProductResponseType,
+	next: NextFunction
+) => {
 	try {
 		const { id } = req.params;
 		const { name, price, quantity } = req.body;
@@ -148,19 +169,26 @@ export const update = async (req: Request, res: FindOneProductResponseType, next
 		const { originalname } = req.file;
 		const { secure_url, bytes, format, public_id } = uploadAPI;
 
-		const newProduct = { name, price, quantity,
+		const newProduct = {
+			name,
+			price,
+			quantity,
 			images: {
 				public_id,
 				fileName: originalname,
-                secure_url,
-                sizeInBytes: bytes,
+				secure_url,
+				sizeInBytes: bytes,
 				format,
-			}
-		}
+			},
+		};
 
-		product = await ProductSchema.findOneAndUpdate({ _id: id }, newProduct, { new: true });
+		product = await ProductSchema.findOneAndUpdate(
+			{ _id: id },
+			newProduct,
+			{ new: true }
+		);
 		return res.status(200).json({ message: 'Success', data: product });
 	} catch (e) {
 		return next(new AppError('Internal Server Error!', 500));
 	}
-}
+};

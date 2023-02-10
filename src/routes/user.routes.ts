@@ -8,7 +8,7 @@ import upload from '../middleware/upload-multer';
 const router = Router();
 
 router.get('/', isAuthenticate, RestrictTo('admin'), findAll);
-router.get('/:id', isAuthenticate, RestrictTo('admin'), findById);
+router.get('/:id', isAuthenticate, findById);
 router.put('/:id', isAuthenticate, upload.single('images'), update);
 
 export default router;
