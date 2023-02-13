@@ -88,13 +88,13 @@ const loginSuccessful = async (
 	}
 
 	const accessToken = generateAccessToken({ id: user._id });
-	const refreshToken = generateRefreshToken({ id: user._id }, res);
+	const refreshToken = generateRefreshToken({ id: user._id });
 
 	await UserSchema.findOneAndUpdate({ _id: user._id }, { refreshToken });
 
 	res.cookie('refreshToken', refreshToken, {
 		httpOnly: true,
-		maxAge: 24 * 60 * 60 * 1000, // secure: true
+		maxAge: 24 * 60 * 60 * 1000,
 	});
 
 	const {

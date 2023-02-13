@@ -4,6 +4,7 @@ import { Request } from 'express';
 import { Address } from './address';
 
 export interface IUser extends Document {
+	id?: string;
 	username: string;
 	account: string;
 	password: string;

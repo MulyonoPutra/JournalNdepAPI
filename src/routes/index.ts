@@ -8,6 +8,7 @@ import ArticlesRoutes from './articles.routes';
 import ContactRoutes from './contact.routes';
 import ContentRoutes from './content.routes';
 import FileRoutes from './file.routes';
+import CategoryRoutes from './category.routes';
 
 const routes = Router();
 
@@ -19,5 +20,6 @@ routes.use('/api/v1/articles', ArticlesRoutes);
 routes.use('/api/v1/contact', ContactRoutes);
 routes.use('/api/v1/content', ContentRoutes);
 routes.use('/api/v1/file', FileRoutes);
+routes.use('/api/v1/category', CategoryRoutes);
 
 export default routes;

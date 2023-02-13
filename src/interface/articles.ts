@@ -1,10 +1,14 @@
 import { Images } from './images';
 import { Category } from './category';
+import { IUser } from './user';
+import { Document } from 'mongoose';
 
-export interface Articles {
+export interface Articles extends Document {
 	title: string;
 	subtitle: string;
-	images: Images;
 	article: string;
+	images: Images;
 	category: Category;
+	user: IUser;
+	_doc: object;
 }
