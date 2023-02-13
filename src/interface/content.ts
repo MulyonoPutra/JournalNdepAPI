@@ -9,7 +9,7 @@ export interface Content {
 export interface Hero {
 	title: string;
 	description: string;
-	images: Images;
+	images: Images[];
 }
 
 export interface Features {

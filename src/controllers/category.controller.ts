@@ -1,9 +1,21 @@
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
-import { Request, Response } from 'express';
+import { NextFunction, Request } from 'express';
 import CategorySchema from '../models/category.schema';
+import { TypedResponse } from '../utility/typed-controller';
+import { ResponseEntity, ResponseMessage } from '../interface/response-entity';
+import { Category } from '../interface/category';
+import AppError from '../utility/app-error';
 
-export const findAllCategory = async (req: Request, res: Response) => {
-	const category = await CategorySchema.find();
+export type CategoryResponseType = TypedResponse<
+	ResponseMessage | ResponseEntity<Category[]> | ResponseEntity<Category>
+>;
+
+export const findAllCategory = async (
+	req: Request,
+	res: CategoryResponseType,
+	next: NextFunction
+) => {
+	const category = (await CategorySchema.find()) as Category[];
 	try {
 		if (category.length <= 0) {
 			return res.status(200).json({
@@ -16,14 +28,18 @@ export const findAllCategory = async (req: Request, res: Response) => {
 			data: category,
 		});
 	} catch (error) {
-		return res.status(500).json({ err: error });
+		return next(new AppError('Internal Server Error!', 500));
 	}
 };
 
-export const createCategory = async (req: Request, res: Response) => {
+export const createCategory = async (
+	req: Request,
+	res: CategoryResponseType,
+	next: NextFunction
+) => {
 	try {
 		if (!req.file) {
-			return res.status(400).json({ messages: 'No file uploaded!' });
+			return res.status(400).json({ message: 'No file uploaded!' });
 		}
 
 		let uploadAPI: UploadApiResponse;
@@ -55,13 +71,17 @@ export const createCategory = async (req: Request, res: Response) => {
 			data: created,
 		});
 	} catch (error) {
-		return res.status(500).json({ msg: 'Internal Server Error!' });
+		return next(new AppError('Internal Server Error!', 500));
 	}
 };
 
-export const findById = async (req: Request, res: Response) => {
+export const findById = async (
+	req: Request,
+	res: CategoryResponseType,
+	next: NextFunction
+) => {
 	const { id } = req.params;
-	const category = await CategorySchema.findById(id);
+	const category = (await CategorySchema.findById(id)) as unknown as Category;
 
 	try {
 		return res.status(200).json({
@@ -69,11 +89,15 @@ export const findById = async (req: Request, res: Response) => {
 			data: category,
 		});
 	} catch (error) {
-		return res.status(500).json({ err: error });
+		return next(new AppError('Internal Server Error!', 500));
 	}
 };
 
-export const removeCategory = async (req: Request, res: Response) => {
+export const removeCategory = async (
+	req: Request,
+	res: CategoryResponseType,
+	next: NextFunction
+) => {
 	const { id } = req.params;
 
 	const category = await CategorySchema.findById(id);
@@ -90,20 +114,24 @@ export const removeCategory = async (req: Request, res: Response) => {
 			message: 'Removed!',
 		});
 	} catch (error) {
-		return res.status(500).json({ err: error });
+		return next(new AppError('Internal Server Error!', 500));
 	}
 };
 
-export const updateCategory = async (req: Request, res: Response) => {
+export const updateCategory = async (
+	req: Request,
+	res: CategoryResponseType,
+	next: NextFunction
+) => {
 	const { id } = req.params;
 
 	try {
 		if (!req.file) {
-			return res.status(400).json({ messages: 'No file uploaded!' });
+			return res.status(400).json({ message: 'No file uploaded!' });
 		}
 
 		let uploadAPI: UploadApiResponse;
-		let category = await CategorySchema.findById(id);
+		let category = (await CategorySchema.findById(id)) as Category;
 
 		const publicId = category?.images.public_id;
 
@@ -136,12 +164,16 @@ export const updateCategory = async (req: Request, res: Response) => {
 				} || category?.images,
 		};
 
-		category = await CategorySchema.findByIdAndUpdate(req.params.id, data, {
-			new: true,
-		});
+		category = (await CategorySchema.findByIdAndUpdate(
+			req.params.id,
+			data,
+			{
+				new: true,
+			}
+		)) as Category;
 
 		return res.status(200).json({ message: 'Success', data: category });
 	} catch (error) {
-		return res.status(500).json({ err: error });
+		return next(new AppError('Internal Server Error!', 500));
 	}
 };

@@ -1,48 +1,55 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request } from 'express';
 import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
-import ContentSchema from '../models/content.schema';
 import HeroSchema from '../models/hero.schema';
 import FeaturesSchema from '../models/features.schema';
 import AboutSchema from '../models/about.schema';
+import { TypedRequest, TypedResponse } from '../utility/typed-controller';
+import { ResponseEntity, ResponseMessage } from '../interface/response-entity';
+import AppError from '../utility/app-error';
+import { About, Features, Hero } from '../interface/content';
+
+export type ContentResponseType = TypedResponse<
+	| ResponseMessage
+	| ResponseEntity<Hero>
+	| ResponseEntity<Features>
+	| ResponseEntity<About>
+>;
+export type ContentRequestType = TypedRequest<
+	Record<string, never>,
+	Hero | Features | About
+>;
 
 const version = '-__v';
-export const findAllContent = async (req: Request, res: Response) => {
-	const content = await ContentSchema.find();
-	try {
-		if (content.length <= 0) {
-			return res.status(200).json({
-				message: 'No results – There is nothing to show',
-			});
-		}
 
-		return res.status(200).json({
-			message: 'Success',
-			data: content,
-		});
-	} catch (error) {
-		return res.status(500).json({ err: error });
-	}
-};
-
-export const getHeroes = async (req: Request, res: Response) => {
-	const heroes = await HeroSchema.findOne().select(version);
+export const getHeroes = async (
+	req: Request,
+	res: ContentResponseType,
+	next: NextFunction
+) => {
+	const heroes = (await HeroSchema.findOne().select(
+		version
+	)) as unknown as Hero;
 	try {
 		return res.status(200).json({
 			message: 'Data successfully retrieved',
 			data: heroes,
 		});
 	} catch (e) {
-		return errorResponse(e, res);
+		return next(new AppError('Internal Server Error!', 500));
 	}
 };
 
-export const setHero = async (req: Request, res: Response) => {
+export const setHero = async (
+	req: ContentRequestType,
+	res: ContentResponseType,
+	next: NextFunction
+) => {
 	let uploadAPI: UploadApiResponse;
 	const files = req.files as Express.Multer.File[];
-	const fileUrl: any[] = [];
+	const fileUrl: string[] = [];
 	try {
 		await Promise.all(
-			files.map(async (file: any) => {
+			files.map(async (file: { path: string }) => {
 				uploadAPI = await cloudinary.uploader.upload(file.path, {
 					folder: 'journal-ndep/Content',
 					resource_type: 'auto',
@@ -61,11 +68,15 @@ export const setHero = async (req: Request, res: Response) => {
 			data: created,
 		});
 	} catch (error) {
-		return res.status(500).json({ messages: 'Internal Server Error!' });
+		return next(new AppError('Internal Server Error!', 500));
 	}
 };
 
-export const setFeatures = async (req: Request, res: Response) => {
+export const setFeatures = async (
+	req: ContentRequestType,
+	res: ContentResponseType,
+	next: NextFunction
+) => {
 	const created = await FeaturesSchema.create(req.body);
 	try {
 		return res.status(201).json({
@@ -73,23 +84,29 @@ export const setFeatures = async (req: Request, res: Response) => {
 			data: created,
 		});
 	} catch (error) {
-		return res.status(500).json({ message: 'Internal Server Error!' });
+		return next(new AppError('Internal Server Error!', 500));
 	}
 };
 
-export const getFeatures = async (req: Request, res: Response) => {
-	const features = await FeaturesSchema.findOne().select(version);
+export const getFeatures = async (
+	req: Request,
+	res: ContentResponseType,
+	next: NextFunction
+) => {
+	const features = (await FeaturesSchema.findOne().select(
+		version
+	)) as unknown as Features;
 	try {
 		return res.status(200).json({
 			message: 'Success',
 			data: features,
 		});
 	} catch (error) {
-		return res.status(500).json({ err: error });
+		return next(new AppError('Internal Server Error!', 500));
 	}
 };
 
-export const removeAll = async (req: Request, res: Response) => {
+export const removeAll = async (req: Request, res: ContentResponseType) => {
 	await FeaturesSchema.remove({}).exec();
 
 	return res.status(200).json({
@@ -97,10 +114,14 @@ export const removeAll = async (req: Request, res: Response) => {
 	});
 };
 
-export const setAbout = async (req: Request, res: Response) => {
+export const setAbout = async (
+	req: ContentRequestType,
+	res: ContentResponseType,
+	next: NextFunction
+) => {
 	try {
 		if (!req.file) {
-			return res.status(400).json({ messages: 'No file uploaded!' });
+			return res.status(400).json({ message: 'No file uploaded!' });
 		}
 
 		let uploadAPI: UploadApiResponse;
@@ -128,26 +149,27 @@ export const setAbout = async (req: Request, res: Response) => {
 				data: created,
 			});
 		} catch (error) {
-			return res.status(400).json({ message: 'Something went wrong!' });
+			return next(new AppError('Something went wrong!', 400));
 		}
 	} catch (error) {
-		return res.status(500).json({ err: error });
+		return next(new AppError('Internal Server Error!', 500));
 	}
 };
 
-export const getAbout = async (req: Request, res: Response) => {
-	const about = await AboutSchema.findOne().select(version);
+export const getAbout = async (
+	req: Request,
+	res: ContentResponseType,
+	next: NextFunction
+) => {
+	const about = (await AboutSchema.findOne().select(
+		version
+	)) as unknown as About;
 	try {
 		return res.status(200).json({
 			message: 'Data successfully retrieved',
 			data: about,
 		});
 	} catch (e) {
-		return errorResponse(e, res);
+		return next(new AppError('Internal Server Error!', 500));
 	}
-};
-
-const errorResponse = (e: unknown, res: Response) => {
-	const errors = (e as Error).message;
-	return res.status(500).json({ message: errors });
 };

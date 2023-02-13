@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import {
-	findAllContent,
 	getAbout,
 	getFeatures,
 	getHeroes,
@@ -14,7 +13,6 @@ import upload from '../middleware/upload-multer';
 
 const router: Router = Router();
 
-router.get('/', findAllContent);
 router.get('/hero', getHeroes);
 router.post('/features', isAuthenticate, setFeatures);
 router.get('/features', getFeatures);

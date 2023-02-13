@@ -1,26 +1,38 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request } from 'express';
 import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
 import articlesSchema from '../models/articles.schema';
 import categorySchema from '../models/category.schema';
 import { UserRequest } from '../interface/user';
+import { TypedResponse } from '../utility/typed-controller';
+import { ResponseEntity, ResponseMessage } from '../interface/response-entity';
+import { Articles } from '../interface/articles';
+import AppError from '../utility/app-error';
 
-export const findAllArticles = async (req: Request, res: Response) => {
-	const userPopulated = {
-		path: 'user',
-		select: ['_id', 'username'],
-	};
-	const categoryPopulated = {
-		path: 'category',
-		select: ['_id', 'name'],
-	};
+export type ArticlesResponseType = TypedResponse<
+	ResponseMessage | ResponseEntity<Articles[]> | ResponseEntity<Articles>
+>;
 
+const userPopulated = {
+	path: 'user',
+	select: ['_id', 'username'],
+};
+const categoryPopulated = {
+	path: 'category',
+	select: ['_id', 'name'],
+};
+
+export const findAllArticles = async (
+	req: Request,
+	res: ArticlesResponseType,
+	next: NextFunction
+) => {
 	try {
-		const articles = await articlesSchema
+		const articles = (await articlesSchema
 			.find({})
 			.populate(userPopulated)
 			.populate(categoryPopulated)
 			.select('-__v')
-			.exec();
+			.exec()) as unknown as Articles[];
 
 		if (articles.length <= 0) {
 			return res.status(200).json({
@@ -33,14 +45,18 @@ export const findAllArticles = async (req: Request, res: Response) => {
 			data: articles,
 		});
 	} catch (error) {
-		return res.status(500).json({ err: error });
+		return next(new AppError('Internal Server Error!', 500));
 	}
 };
 
-export const createArticles = async (req: UserRequest, res: Response) => {
+export const createArticles = async (
+	req: UserRequest,
+	res: ArticlesResponseType,
+	next: NextFunction
+) => {
 	try {
 		if (!req.file) {
-			return res.status(400).json({ messages: 'No file uploaded!' });
+			return res.status(400).json({ message: 'No file uploaded!' });
 		}
 
 		let uploadAPI: UploadApiResponse;
@@ -79,13 +95,22 @@ export const createArticles = async (req: UserRequest, res: Response) => {
 			message: 'Created!',
 		});
 	} catch (error) {
-		return res.status(500).json({ message: 'Internal Server Errors!' });
+		return next(new AppError('Internal Server Error!', 500));
 	}
 };
 
-export const findById = async (req: Request, res: Response) => {
+export const findById = async (
+	req: Request,
+	res: ArticlesResponseType,
+	next: NextFunction
+) => {
 	const { id } = req.params;
-	const article = await articlesSchema.findById(id);
+	const article = (await articlesSchema
+		.findById(id)
+		.populate(userPopulated)
+		.populate(categoryPopulated)
+		.select('-__v')
+		.exec()) as unknown as Articles;
 
 	try {
 		return res.status(200).json({
@@ -93,11 +118,15 @@ export const findById = async (req: Request, res: Response) => {
 			data: article,
 		});
 	} catch (error) {
-		return res.status(500).json({ err: error });
+		return next(new AppError('Internal Server Error!', 500));
 	}
 };
 
-export const removeArticles = async (req: Request, res: Response) => {
+export const removeArticles = async (
+	req: Request,
+	res: ArticlesResponseType,
+	next: NextFunction
+) => {
 	try {
 		const { id } = req.params;
 
@@ -113,19 +142,23 @@ export const removeArticles = async (req: Request, res: Response) => {
 			message: 'Successfully removed!',
 		});
 	} catch (error) {
-		return res.status(500).json({ err: error });
+		return next(new AppError('Internal Server Error!', 500));
 	}
 };
 
-export const updateArticles = async (req: UserRequest, res: Response) => {
+export const updateArticles = async (
+	req: UserRequest,
+	res: ArticlesResponseType,
+	next: NextFunction
+) => {
 	const { id } = req.params;
 	try {
 		if (!req.file) {
-			return res.status(400).json({ messages: 'No file uploaded!' });
+			return res.status(400).json({ message: 'No file uploaded!' });
 		}
 
 		let uploadAPI: UploadApiResponse;
-		let article = await articlesSchema.findById(id);
+		const article = await articlesSchema.findById(id);
 
 		const publicId = article?.images.public_id;
 
@@ -145,7 +178,9 @@ export const updateArticles = async (req: UserRequest, res: Response) => {
 		const { originalname } = req.file;
 		const { secure_url, bytes, format, public_id } = uploadAPI;
 
-		const { category: { id: categoryId } } = req.body;
+		const {
+			category: { id: categoryId },
+		} = req.body;
 		const category = await categorySchema.findById(categoryId);
 
 		const data = {
@@ -164,12 +199,12 @@ export const updateArticles = async (req: UserRequest, res: Response) => {
 			user: req.user?._id,
 		};
 
-		article = await articlesSchema.findByIdAndUpdate(req.params.id, data, {
+		await articlesSchema.findByIdAndUpdate(req.params.id, data, {
 			new: true,
 		});
 
-		return res.status(200).json({ message: 'Updated!', data: article });
+		return res.status(200).json({ message: 'Updated!' });
 	} catch (error) {
-		return res.status(500).json({ err: error });
+		return next(new AppError('Internal Server Error!', 500));
 	}
 };
