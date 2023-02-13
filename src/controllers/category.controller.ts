@@ -1,14 +1,9 @@
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 import { NextFunction, Request } from 'express';
 import CategorySchema from '../models/category.schema';
-import { TypedResponse } from '../utility/typed-controller';
-import { ResponseEntity, ResponseMessage } from '../interface/response-entity';
 import { Category } from '../interface/category';
 import AppError from '../utility/app-error';
-
-export type CategoryResponseType = TypedResponse<
-	ResponseMessage | ResponseEntity<Category[]> | ResponseEntity<Category>
->;
+import { CategoryResponseType } from '../type/category.type';
 
 export const findAllCategory = async (
 	req: Request,

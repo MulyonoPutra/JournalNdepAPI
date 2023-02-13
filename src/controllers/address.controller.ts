@@ -1,22 +1,11 @@
 import { Request } from 'express';
 import axios, { AxiosError } from 'axios';
 import { Environment } from '../config/environment';
-import { TypedResponse } from '../utility/typed-controller';
-import { ResponseEntity, ResponseMessage } from '../interface/response-entity';
-import { Districts, Province, Regencies, Villages } from '../interface/address';
+import { AddressResponseType } from '../type/address.type';
 
 export interface Errors extends AxiosError {
 	errors: unknown | never;
 }
-
-export type AddressResponseType = TypedResponse<
-	| Errors
-	| ResponseMessage
-	| ResponseEntity<Province[]>
-	| ResponseEntity<Regencies[]>
-	| ResponseEntity<Districts[]>
-	| ResponseEntity<Villages[]>
->;
 
 export const getProvinces = async (req: Request, res: AddressResponseType) => {
 	try {

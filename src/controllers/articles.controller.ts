@@ -3,14 +3,9 @@ import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
 import articlesSchema from '../models/articles.schema';
 import categorySchema from '../models/category.schema';
 import { UserRequest } from '../interface/user';
-import { TypedResponse } from '../utility/typed-controller';
-import { ResponseEntity, ResponseMessage } from '../interface/response-entity';
 import { Articles } from '../interface/articles';
 import AppError from '../utility/app-error';
-
-export type ArticlesResponseType = TypedResponse<
-	ResponseMessage | ResponseEntity<Articles[]> | ResponseEntity<Articles>
->;
+import { ArticlesResponseType } from '../type/articles.type';
 
 const userPopulated = {
 	path: 'user',

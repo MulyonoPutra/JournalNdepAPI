@@ -1,14 +1,8 @@
 import { NextFunction, Request } from 'express';
 import ContactSchema from '../models/contact.schema';
-import { TypedRequest, TypedResponse } from '../utility/typed-controller';
-import { ResponseEntity, ResponseMessage } from '../interface/response-entity';
 import { Contact } from '../interface/contact';
 import AppError from '../utility/app-error';
-
-export type ContactResponseType = TypedResponse<
-	ResponseMessage | ResponseEntity<Contact[]> | ResponseEntity<Contact>
->;
-export type ContactRequestType = TypedRequest<Record<string, never>, Contact>;
+import { ContactRequestType, ContactResponseType } from '../type/contact.type';
 
 export const findAllMessages = async (
 	req: Request,

@@ -3,21 +3,9 @@ import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
 import HeroSchema from '../models/hero.schema';
 import FeaturesSchema from '../models/features.schema';
 import AboutSchema from '../models/about.schema';
-import { TypedRequest, TypedResponse } from '../utility/typed-controller';
-import { ResponseEntity, ResponseMessage } from '../interface/response-entity';
 import AppError from '../utility/app-error';
 import { About, Features, Hero } from '../interface/content';
-
-export type ContentResponseType = TypedResponse<
-	| ResponseMessage
-	| ResponseEntity<Hero>
-	| ResponseEntity<Features>
-	| ResponseEntity<About>
->;
-export type ContentRequestType = TypedRequest<
-	Record<string, never>,
-	Hero | Features | About
->;
+import { ContentRequestType, ContentResponseType } from '../type/content.type';
 
 const version = '-__v';
 

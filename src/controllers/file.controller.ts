@@ -1,15 +1,9 @@
 import FileSchema from '../models/file.schema';
 import { NextFunction, Request } from 'express';
 import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
-import { TypedRequest, TypedResponse } from '../utility/typed-controller';
-import { ResponseEntity, ResponseMessage } from '../interface/response-entity';
 import { Images } from '../interface/images';
 import AppError from '../utility/app-error';
-
-export type FileResponseType = TypedResponse<
-	ResponseMessage | ResponseEntity<Images[]> | ResponseEntity<Images>
->;
-export type FileRequestType = TypedRequest<Record<string, never>, Images>;
+import { FileRequestType, FileResponseType } from '../type/file.type';
 
 export const uploadFile = async (
 	req: FileRequestType,
