@@ -1,15 +1,11 @@
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
-import { NextFunction, Request } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import CategorySchema from '../models/category.schema';
 import { Category } from '../interface/category';
 import AppError from '../utility/app-error';
 import { CategoryResponseType } from '../type/category.type';
 
-export const findAllCategory = async (
-	req: Request,
-	res: CategoryResponseType,
-	next: NextFunction
-) => {
+export const findAllCategory = async (req: Request, res: CategoryResponseType, next: NextFunction) => {
 	const category = (await CategorySchema.find()) as Category[];
 	try {
 		if (category.length <= 0) {
@@ -27,11 +23,50 @@ export const findAllCategory = async (
 	}
 };
 
-export const createCategory = async (
-	req: Request,
-	res: CategoryResponseType,
-	next: NextFunction
-) => {
+export const findCategoriesWithPagination = async (req: Request, res: CategoryResponseType, next: NextFunction) => {
+
+	try {
+		const { page = 1, pageSize = 10 } = req.query;
+
+		const total = await CategorySchema.countDocuments();
+		const data = await CategorySchema.find().skip(( +page - 1) * +pageSize).limit(+pageSize);
+
+		return res.status(200).json({
+			message: 'Success',
+			data: {
+				total,
+				page: +page,
+				pageSize: +pageSize,
+				data,
+			},
+		});
+
+	} catch (error) {
+		return next(new AppError('Internal Server Error!', 500));
+	}
+}
+
+export const findWithInfinitePage = async (req: Request, res: CategoryResponseType, next: NextFunction) => {
+	try {
+		const page = parseInt(req.query.page as string) || 1;
+		const limit = 3;
+
+		const data = await CategorySchema.find()
+			.skip((page - 1) * limit)
+			.limit(limit)
+			.exec();
+
+		return res.status(200).json({
+			message: 'Success',
+			data
+		});
+
+	} catch (error) {
+		return next(new AppError('Internal Server Error!', 500));
+	}
+}
+
+export const createCategory = async (req: Request, res: CategoryResponseType, next: NextFunction) => {
 	try {
 		if (!req.file) {
 			return res.status(400).json({ message: 'No file uploaded!' });
@@ -70,11 +105,7 @@ export const createCategory = async (
 	}
 };
 
-export const findById = async (
-	req: Request,
-	res: CategoryResponseType,
-	next: NextFunction
-) => {
+export const findById = async (req: Request, res: CategoryResponseType, next: NextFunction) => {
 	const { id } = req.params;
 	const category = (await CategorySchema.findById(id)) as unknown as Category;
 
@@ -88,11 +119,7 @@ export const findById = async (
 	}
 };
 
-export const removeCategory = async (
-	req: Request,
-	res: CategoryResponseType,
-	next: NextFunction
-) => {
+export const removeCategory = async (req: Request, res: CategoryResponseType, next: NextFunction) => {
 	const { id } = req.params;
 
 	const category = await CategorySchema.findById(id);
@@ -113,11 +140,7 @@ export const removeCategory = async (
 	}
 };
 
-export const updateCategory = async (
-	req: Request,
-	res: CategoryResponseType,
-	next: NextFunction
-) => {
+export const updateCategory = async (req: Request, res: CategoryResponseType, next: NextFunction) => {
 	const { id } = req.params;
 
 	try {
