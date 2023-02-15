@@ -43,6 +43,6 @@ export const isAuthenticate = async (
 		}
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	} catch (err: any) {
-		return res.status(500).json({ message: err.message });
+		return res.status(401).json({ message: err.message });
 	}
 };
