@@ -6,7 +6,7 @@ import AppError from '../utility/app-error';
 import { CategoryResponseType } from '../type/category.type';
 
 export const findAllCategory = async (req: Request, res: CategoryResponseType, next: NextFunction) => {
-	const category = (await CategorySchema.find()) as Category[];
+	const category = (await CategorySchema.find().sort({ createdAt: -1 }).exec()) as unknown as Category[];
 	try {
 		if (category.length <= 0) {
 			return res.status(200).json({
