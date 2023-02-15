@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, Response } from 'express';
 import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
 import articlesSchema from '../models/articles.schema';
 import categorySchema from '../models/category.schema';
@@ -7,7 +7,7 @@ import { Articles } from '../interface/articles';
 import AppError from '../utility/app-error';
 import { ArticlesResponseType } from '../type/articles.type';
 
-const userPopulated = { path: 'user', select: ['_id', 'username', 'avatar'], };
+const userPopulated = { path: 'user', select: ['_id', 'username', 'avatar'] };
 const categoryPopulated = {
 	path: 'category',
 	select: ['_id', 'name'],
@@ -232,21 +232,27 @@ export const updateArticles = async (
 	}
 };
 
-export const searchArticles = async (req: Request, res: Response, next: NextFunction) => {
+export const searchArticles = async (
+	req: Request,
+	res: Response,
+	next: NextFunction
+) => {
 	const query = req.query.find;
 	try {
-		const data = await articlesSchema.find({
-			$or: [
-				{ title: { $regex: query, $options: 'i' } },
-				{ subtitle: { $regex: query, $options: 'i' } },
-			]
-		}).populate(userPopulated)
+		const data = (await articlesSchema
+			.find({
+				$or: [
+					{ title: { $regex: query, $options: 'i' } },
+					{ subtitle: { $regex: query, $options: 'i' } },
+				],
+			})
+			.populate(userPopulated)
 			.populate(categoryPopulated)
-			.select('-__v').exec() as unknown as Articles[];
+			.select('-__v')
+			.exec()) as unknown as Articles[];
 
 		return res.status(200).json({ message: 'Successfully!', data });
-
 	} catch (error) {
 		return next(new AppError('Internal Server Error!', 500));
 	}
-}
+};

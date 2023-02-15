@@ -23,7 +23,9 @@ import {
 } from '../type/auth.type';
 import { UserDTO } from '../interface/login';
 
-export const register = (role?: string) => async (req: RegisterRequestType, res: RegisterResponseType) => {
+export const register =
+	(role?: string) =>
+	async (req: RegisterRequestType, res: RegisterResponseType) => {
 		try {
 			const { username, account, password } = req.body;
 			const users = await UserSchema.findOne({ account });
@@ -68,10 +70,10 @@ export const login = async (req: LoginRequestType, res: LoginResponseType) => {
 			});
 		}
 
-		if (!await bcrypt.compare(password, user.password)) {
+		if (!(await bcrypt.compare(password, user.password))) {
 			return res.status(400).send({
-				message: 'Invalid credentials'
-			})
+				message: 'Invalid credentials',
+			});
 		}
 
 		await loginSuccessful(user, password, res);
@@ -80,8 +82,11 @@ export const login = async (req: LoginRequestType, res: LoginResponseType) => {
 	}
 };
 
-const loginSuccessful = async (user: IUser, passwords: string, res: LoginResponseType) => {
-
+const loginSuccessful = async (
+	user: IUser,
+	passwords: string,
+	res: LoginResponseType
+) => {
 	const accessToken = generateAccessToken({ id: user._id });
 	const refreshToken = generateRefreshToken({ id: user._id }, res);
 
@@ -92,8 +97,18 @@ const loginSuccessful = async (user: IUser, passwords: string, res: LoginRespons
 		maxAge: 24 * 60 * 60 * 1000,
 	});
 
-
-	const { _id, images, username, account, role, phone, dob, description, avatar, address } = user;
+	const {
+		_id,
+		images,
+		username,
+		account,
+		role,
+		phone,
+		dob,
+		description,
+		avatar,
+		address,
+	} = user;
 
 	const userDTO: UserDTO = {
 		_id,
@@ -114,19 +129,33 @@ const loginSuccessful = async (user: IUser, passwords: string, res: LoginRespons
 	});
 };
 
-export const refreshToken = async (req: RefreshTokenRequestType, res: RefreshTokenResponseType) => {
+export const refreshToken = async (
+	req: RefreshTokenRequestType,
+	res: RefreshTokenResponseType
+) => {
 	try {
 		const token = req.cookies?.refreshToken;
 		if (!token) {
-			return res.status(401).json({ message: 'Refresh token not found! Please login again.' });
+			return res
+				.status(401)
+				.json({
+					message: 'Refresh token not found! Please login again.',
+				});
 		}
 
-		const decoded = jwt.verify(token, `${Environment.refreshTokenSecret}`) as IDecoded;
+		const decoded = jwt.verify(
+			token,
+			`${Environment.refreshTokenSecret}`
+		) as IDecoded;
 		if (!decoded.id) {
-			return res.status(401).json({ message: 'Refresh token is invalid!' });
+			return res
+				.status(401)
+				.json({ message: 'Refresh token is invalid!' });
 		}
 
-		const user = await UserSchema.findOne({ _id: decoded.id }).select('+password');
+		const user = await UserSchema.findOne({ _id: decoded.id }).select(
+			'+password'
+		);
 		if (!user) {
 			return res.status(400).json({
 				message: 'This account does not exist!',
@@ -141,7 +170,10 @@ export const refreshToken = async (req: RefreshTokenRequestType, res: RefreshTok
 	}
 };
 
-export const logout = async (req: LogoutRequestType, res: NewAccessTokenResponseType) => {
+export const logout = async (
+	req: LogoutRequestType,
+	res: NewAccessTokenResponseType
+) => {
 	try {
 		const token = req.cookies?.refreshToken;
 		if (!token) {
@@ -156,7 +188,10 @@ export const logout = async (req: LogoutRequestType, res: NewAccessTokenResponse
 		}
 
 		const userId = user[0]?._id;
-		await UserSchema.findOneAndUpdate({ _id: userId }, { refreshToken: '' });
+		await UserSchema.findOneAndUpdate(
+			{ _id: userId },
+			{ refreshToken: '' }
+		);
 		res.clearCookie('refreshToken');
 		return res.status(200).json({ message: 'Successfully logout!' });
 	} catch (e) {

@@ -5,8 +5,14 @@ import { Category } from '../interface/category';
 import AppError from '../utility/app-error';
 import { CategoryResponseType } from '../type/category.type';
 
-export const findAllCategory = async (req: Request, res: CategoryResponseType, next: NextFunction) => {
-	const category = (await CategorySchema.find().sort({ createdAt: -1 }).exec()) as unknown as Category[];
+export const findAllCategory = async (
+	req: Request,
+	res: CategoryResponseType,
+	next: NextFunction
+) => {
+	const category = (await CategorySchema.find()
+		.sort({ createdAt: -1 })
+		.exec()) as unknown as Category[];
 	try {
 		if (category.length <= 0) {
 			return res.status(200).json({
@@ -23,13 +29,18 @@ export const findAllCategory = async (req: Request, res: CategoryResponseType, n
 	}
 };
 
-export const findCategoriesWithPagination = async (req: Request, res: CategoryResponseType, next: NextFunction) => {
-
+export const findCategoriesWithPagination = async (
+	req: Request,
+	res: CategoryResponseType,
+	next: NextFunction
+) => {
 	try {
 		const { page = 1, pageSize = 10 } = req.query;
 
 		const total = await CategorySchema.countDocuments();
-		const data = await CategorySchema.find().skip(( +page - 1) * +pageSize).limit(+pageSize);
+		const data = await CategorySchema.find()
+			.skip((+page - 1) * +pageSize)
+			.limit(+pageSize);
 
 		return res.status(200).json({
 			message: 'Success',
@@ -40,13 +51,16 @@ export const findCategoriesWithPagination = async (req: Request, res: CategoryRe
 				data,
 			},
 		});
-
 	} catch (error) {
 		return next(new AppError('Internal Server Error!', 500));
 	}
-}
+};
 
-export const findWithInfinitePage = async (req: Request, res: CategoryResponseType, next: NextFunction) => {
+export const findWithInfinitePage = async (
+	req: Request,
+	res: CategoryResponseType,
+	next: NextFunction
+) => {
 	try {
 		const page = parseInt(req.query.page as string) || 1;
 		const limit = 3;
@@ -58,15 +72,18 @@ export const findWithInfinitePage = async (req: Request, res: CategoryResponseTy
 
 		return res.status(200).json({
 			message: 'Success',
-			data
+			data,
 		});
-
 	} catch (error) {
 		return next(new AppError('Internal Server Error!', 500));
 	}
-}
+};
 
-export const createCategory = async (req: Request, res: CategoryResponseType, next: NextFunction) => {
+export const createCategory = async (
+	req: Request,
+	res: CategoryResponseType,
+	next: NextFunction
+) => {
 	try {
 		if (!req.file) {
 			return res.status(400).json({ message: 'No file uploaded!' });
@@ -105,7 +122,11 @@ export const createCategory = async (req: Request, res: CategoryResponseType, ne
 	}
 };
 
-export const findById = async (req: Request, res: CategoryResponseType, next: NextFunction) => {
+export const findById = async (
+	req: Request,
+	res: CategoryResponseType,
+	next: NextFunction
+) => {
 	const { id } = req.params;
 	const category = (await CategorySchema.findById(id)) as unknown as Category;
 
@@ -119,7 +140,11 @@ export const findById = async (req: Request, res: CategoryResponseType, next: Ne
 	}
 };
 
-export const removeCategory = async (req: Request, res: CategoryResponseType, next: NextFunction) => {
+export const removeCategory = async (
+	req: Request,
+	res: CategoryResponseType,
+	next: NextFunction
+) => {
 	const { id } = req.params;
 
 	const category = await CategorySchema.findById(id);
@@ -140,7 +165,11 @@ export const removeCategory = async (req: Request, res: CategoryResponseType, ne
 	}
 };
 
-export const updateCategory = async (req: Request, res: CategoryResponseType, next: NextFunction) => {
+export const updateCategory = async (
+	req: Request,
+	res: CategoryResponseType,
+	next: NextFunction
+) => {
 	const { id } = req.params;
 
 	try {

@@ -6,4 +6,3 @@ export interface Category {
 	description: string;
 	images: Images;
 }
-

@@ -2,10 +2,12 @@ import { Router } from 'express';
 import {
 	createArticles,
 	findAllArticles,
-	findById, recentArticles,
-	removeArticles, searchArticles,
-	updateArticles
-} from "../controllers/articles.controller";
+	findById,
+	recentArticles,
+	removeArticles,
+	searchArticles,
+	updateArticles,
+} from '../controllers/articles.controller';
 import { isAuthenticate } from '../middleware/is-authenticate';
 import upload from '../middleware/upload-multer';
 
