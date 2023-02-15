@@ -256,3 +256,14 @@ export const searchArticles = async (
 		return next(new AppError('Internal Server Error!', 500));
 	}
 };
+
+export const findArticleByUserId = async (req: Request, res: Response, next: NextFunction) => {
+	try {
+		const userId = req.params.id;
+		const data = await articlesSchema.find({ user: userId });
+		return res.status(200).json({ message: 'Successfully!', data });
+
+	} catch (error) {
+		return next(new AppError('Internal Server Error!', 500));
+	}
+}

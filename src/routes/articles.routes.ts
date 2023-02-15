@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import {
 	createArticles,
-	findAllArticles,
+	findAllArticles, findArticleByUserId,
 	findById,
 	recentArticles,
 	removeArticles,
 	searchArticles,
-	updateArticles,
-} from '../controllers/articles.controller';
+	updateArticles
+} from "../controllers/articles.controller";
 import { isAuthenticate } from '../middleware/is-authenticate';
 import upload from '../middleware/upload-multer';
 
@@ -17,6 +17,7 @@ router.get('/recent', recentArticles);
 router.get('/', searchArticles);
 router.get('/', findAllArticles);
 router.get('/:id', findById);
+router.get('/user/:id', findArticleByUserId);
 router.put('/:id', isAuthenticate, upload.single('images'), updateArticles);
 router.post('/', isAuthenticate, upload.single('images'), createArticles);
 router.delete('/:id', isAuthenticate, removeArticles);
