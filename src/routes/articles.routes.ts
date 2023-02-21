@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import {
 	createArticles,
-	findAllArticles, findArticleByUserId,
+	findAllArticles, findArticleByCategoryId, findArticleByUserId,
 	findById,
-	recentArticles,
+	recentArticles, removeArticleByCategoryId,
 	removeArticles,
 	searchArticles,
 	updateArticles
@@ -14,10 +14,12 @@ import upload from '../middleware/upload-multer';
 const router = Router();
 
 router.get('/recent', recentArticles);
-router.get('/', searchArticles);
+router.get('/search', searchArticles);
 router.get('/', findAllArticles);
 router.get('/:id', findById);
-router.get('/user/:id', findArticleByUserId);
+router.get('/user/:id', isAuthenticate, findArticleByUserId);
+router.get('/category/:id', findArticleByCategoryId);
+router.delete('/categories/:categoryId/articles/:articleId', isAuthenticate, removeArticleByCategoryId);
 router.put('/:id', isAuthenticate, upload.single('images'), updateArticles);
 router.post('/', isAuthenticate, upload.single('images'), createArticles);
 router.delete('/:id', isAuthenticate, removeArticles);

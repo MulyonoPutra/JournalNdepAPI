@@ -234,7 +234,7 @@ export const updateArticles = async (
 
 export const searchArticles = async (
 	req: Request,
-	res: Response,
+	res: ArticlesResponseType,
 	next: NextFunction
 ) => {
 	const query = req.query.find;
@@ -257,7 +257,7 @@ export const searchArticles = async (
 	}
 };
 
-export const findArticleByUserId = async (req: Request, res: Response, next: NextFunction) => {
+export const findArticleByUserId = async (req: Request, res: ArticlesResponseType, next: NextFunction) => {
 	try {
 		const userId = req.params.id;
 		const data = await articlesSchema.find({ user: userId });
@@ -266,4 +266,49 @@ export const findArticleByUserId = async (req: Request, res: Response, next: Nex
 	} catch (error) {
 		return next(new AppError('Internal Server Error!', 500));
 	}
+}
+
+export const findArticleByCategoryId = async (req: Request, res: ArticlesResponseType, next: NextFunction) => {
+	try {
+		const { id } = req.params;
+		const data = await articlesSchema.find({ category: id })
+			.populate(userPopulated)
+			.populate(categoryPopulated)
+			.select('-__v')
+			.exec() as unknown as Articles;
+
+		if(!data) {
+			return res.status(404).json({ message: `Article with category ${id} is not found` });
+		}
+
+		return res.status(200).json({ message: 'Successfully!', data });
+	} catch (error) {
+		return next(new AppError('Internal Server Error!', 500));
+	}
+}
+
+export const removeArticleByCategoryId = async (req: Request, res: ArticlesResponseType, next: NextFunction) => {
+	try {
+		const categoryId = req.params.categoryId;
+		const articleId = req.params.articleId;
+
+		const category = await categorySchema.findById(categoryId);
+		if (!category) {
+			return res.status(404).json({ message: 'Category not found' });
+		}
+
+		// Find the article in the category
+		const article = await articlesSchema.findOne({ _id: articleId, category: categoryId });
+		if (!article) {
+			return res.status(404).json({ message: 'Article not found in category' });
+		}
+
+		// Remove the article
+		const result = await articlesSchema.deleteOne({ _id: articleId, category: categoryId });
+		res.status(200).json({ message: `Removed ${result.deletedCount} article` });
+
+	} catch (error) {
+		return next(new AppError('Internal Server Error!', 500));
+	}
+
 }
