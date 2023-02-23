@@ -4,7 +4,7 @@ import { LoginResponseType } from '../type/auth.type';
 const { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } = process.env;
 
 export const generateAccessToken = (payload: object) => {
-	return jwt.sign(payload, `${ACCESS_TOKEN_SECRET}`, { expiresIn: '30m' });
+	return jwt.sign(payload, `${ACCESS_TOKEN_SECRET}`, { expiresIn: '7d' });
 };
 
 export const generateRefreshToken = (
