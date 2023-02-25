@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "ts-node-dev --respawn src/index.ts",
-    "build": "tsc",
+    "build": "rm -rf build && node esbuild.js",
     "lint": "eslint src/** --ext .ts",
     "start": "node ./build/src/index.js"
   },
