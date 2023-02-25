@@ -260,7 +260,11 @@ export const searchArticles = async (
 export const findArticleByUserId = async (req: Request, res: ArticlesResponseType, next: NextFunction) => {
 	try {
 		const userId = req.params.id;
-		const data = await articlesSchema.find({ user: userId });
+		const data = await articlesSchema.find({ user: userId })
+			.populate(userPopulated)
+			.populate(categoryPopulated)
+			.select('-__v')
+			.exec() as unknown as Articles[];
 		return res.status(200).json({ message: 'Successfully!', data });
 
 	} catch (error) {
